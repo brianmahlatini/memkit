@@ -20,7 +20,7 @@ typedef struct {
     size_t        capacity;      /* objects across all pages */
 } mk_pool;
 
-int    mk_pool_init(mk_pool *p, size_t obj_size, size_t objs_per_page); /* 0 ok, -1 bad args */
+int    mk_pool_init(mk_pool *p, size_t obj_size, size_t objs_per_page); /* 0 ok, -1 bad args. Overwrites *p: never call on a live pool (destroy first). */
 void  *mk_pool_alloc(mk_pool *p);                                      /* NULL on OOM */
 void   mk_pool_free(mk_pool *p, void *obj);                             /* NULL is a no-op */
 void   mk_pool_destroy(mk_pool *p);

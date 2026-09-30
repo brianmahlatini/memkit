@@ -97,8 +97,10 @@ static void test_pool_reuse_and_lazy_pages(void) {
     for (int i = 0; i < 200; i++) mk_pool_free(&p, objs[i]);
     CHECK(p.live == 0);
     mk_pool_free(&p, NULL);
-    CHECK(mk_pool_init(&p, 0, 1) == -1);
     mk_pool_destroy(&p);
+
+    mk_pool bad;                                          /* separate object: init zeroes its target */
+    CHECK(mk_pool_init(&bad, 0, 1) == -1);
 }
 
 static mk_pool g_dp;
@@ -145,7 +147,7 @@ static void test_heap_size_classes(void) {
         void *p = mk_heap_alloc(&h, sz);
         size_t u = mk_heap_usable_size(&h, p);
         if (!(p && ((uintptr_t)p & 15) == 0 && u >= sz && (sz <= 128 ? u - sz < 16 : u <= sz + sz / 4 + 16))) {
-            CHECK(!"size class bound violated");
+            CHECK(0 && "size class bound violated");
             fprintf(stderr, "    size=%zu usable=%zu\n", sz, u);
             break;
         }
