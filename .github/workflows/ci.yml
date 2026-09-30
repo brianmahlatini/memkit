@@ -1,0 +1,21 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+        config:
+          - { name: release, flags: "-DCMAKE_BUILD_TYPE=Release" }
+          - { name: harden,  flags: "-DCMAKE_BUILD_TYPE=Release -DMEMKIT_HARDEN=ON" }
+          - { name: asan,    flags: "-DCMAKE_BUILD_TYPE=Debug -DMEMKIT_SANITIZE=ON" }
+    name: ${{ matrix.compiler }}-${{ matrix.config.name }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B build -DCMAKE_C_COMPILER=${{ matrix.compiler }} ${{ matrix.config.flags }}
+      - run: cmake --build build -j
+      - run: ctest --test-dir build --output-on-failure
+      - if: matrix.config.name == 'release'
+        run: ./build/memkit_bench
